@@ -1,0 +1,129 @@
+---
+title: "Forecasting Quarterback Efficiency with Passing EPA for the Latter Half of the NFL 2023 Season"
+author: 
+  - Jiwon Choi
+thanks: "Code and data are available at: https://github.com/jwonc4602/nfl-prediction."
+date: today
+date-format: long
+abstract: "This study introduces a novel approach to forecasting quarterback efficiency in the NFL by leveraging passing Expected Points Added (EPA) through logistic regression. Recognizing the pivotal role quarterbacks play in influencing game outcomes, we sought to predict their performance with respect to EPA - a metric that encapsulates the value added on a per-play basis. By transforming passing EPA into a binary variable—above or below the median—we employed logistic regression to model quarterback efficiency, drawing on data from the first nine weeks of the 2023 NFL season. The methodology not only highlights significant performance indicators but also offers strategic insights for teams. Despite inherent limitations, our model demonstrates a robust framework for predicting quarterback performance, with implications for enhancing team strategies and understanding game dynamics."
+format: pdf
+number-sections: true
+bibliography: references.bib
+---
+```{python}
+#| include: false
+#| warning: false
+#| message: false
+
+import pandas as pd
+import numpy as np
+import joblib
+import os
+
+
+# Replace these paths with the absolute paths to your files
+csv_file_path = '/Users/jiwonchoi/Documents/GitHub/nfl-prediction/data/analysis_data/cleaned_weekly_qb_stats_2023.csv'
+model_file_path = '/Users/jiwonchoi/Documents/GitHub/nfl-prediction/models/passing_epa_forecasting_model.pkl'
+
+# Attempt to load the files using the absolute paths
+try:
+    cleaned_data = pd.read_csv(csv_file_path)
+    model = joblib.load(model_file_path)
+    print("Files loaded successfully!")
+except Exception as e:
+    print("Error loading files:", e)
+
+```
+
+
+# Introduction
+The quarterback position in American football is often heralded as the most crucial within the sport, with a quarterback's performance significantly influencing the outcome of a game. Given this importance, accurate prediction of quarterback efficiency is vital for team strategy and game planning. This study aims to forecast quarterback efficiency for the latter half of the NFL 2023 season using a statistical approach grounded in passing Expected Points Added (EPA).
+
+Passing EPA is a sophisticated metric that quantifies the contribution of each passing play to the team's scoring potential, adjusting for the context of the play. Our research employs logistic regression, a predictive modeling technique well-suited for binary outcomes, to predict whether a quarterback's performance in terms of passing EPA will be above or below the season's median. This binary classification facilitates a clear, actionable insight into quarterback performance expectations.
+
+By analyzing quarterback statistics from the first half of the 2023 NFL season, this study applies logistic regression to project future performances. The choice of logistic regression was driven by its effectiveness in handling binary data and its capacity to provide probabilistic outcomes, offering a nuanced view of quarterback efficiency that is both informative and practical for team decision-making.
+
+This paper outlines the methodology for constructing and applying the logistic regression model, discusses the implications of our findings, and considers the model's limitations and potential areas for future research. Through this analysis, we contribute to the broader field of sports analytics by providing a model that can predict quarterback efficiency with notable accuracy, offering valuable insights for teams, analysts, and enthusiasts of the NFL.
+
+# Data {#sec-data}
+In this project, I sourced the dataset through the 'nfl_data_py' Python API [@citenfl_data_py], focusing on the 2023 NFL season. The data collection and analysis were performed using Python [@citePython], with the support of libraries such as pandas [@citePandas] and numpy [@citeNumpy].
+
+The specific variables chosen for analysis were 'player_id', 'season', 'week', 'season_type', 'passing_epa', 'completions', 'attempts', 'passing_yards', 'passing_tds', and 'interceptions'. To forecast the second half of the NFL 2023 season, I cleaned the dataset, retaining only the first 9 weeks of data and excluding any week beyond week 9. (see @fig-cleaned-data-example)
+
+```{python}
+#| label: fig-cleaned-data-example
+#| fig-cap: Sample of Cleaned NFL Data
+#| echo: false
+#| warning: false
+#| message: false
+
+cleaned_data.head(7)
+```
+
+
+# Model
+
+For our research, we implement a forecasting model utilizing logistic regression, a technique well-suited for predicting binary outcomes. Our objective is to forecast a quarterback's passing EPA (Expected Points Added) performance, categorizing it as above or below the median value. This process involves two main steps: constructing a logistic regression model with a selected dataset and then applying this model for prediction.
+
+Initially, we select a dataset for developing our model, in this case, quarterback statistics from the 2023 NFL season. These statistics include completions, attempts, passing yards, touchdowns, and interceptions, which serve as our predictive features. The target variable, passing_epa, is transformed into a binary outcome based on whether the EPA is above or below its median value within the dataset. This binary formulation is crucial for applying logistic regression, which is inherently designed for dichotomous outcomes.
+
+The logistic regression model is defined as follows:
+
+\begin{equation}
+log(\frac{\hat{p}}{1 - \hat{p}}) = \beta_{0} + \beta_{1}x_{completions} + \beta_{2}x_{attempts} + \beta_{3}x_{passing_yards} + \beta_{4}x_{passing_tds} + \beta_{5}x_{interceptions}
+\label{eq:logit}
+\end{equation}
+
+In equation \ref{eq:logit}, $\hat{p}$ represents the probability of a quarterback's performance being above the median EPA, and each $\beta$ denotes a coefficient estimated through logistic regression analysis. The features chosen—completions, attempts, passing yards, touchdowns, and interceptions—are critical indicators of a quarterback's performance, offering a comprehensive view of their ability to contribute positively to the game's outcome.
+
+Following the development of the logistic regression model, we employ a Python script for the analysis. The train_model function is central to this process, facilitating the model training using the scikit-learn library [@pedregosa2011scikit]. This library provides a robust platform for implementing logistic regression and evaluating the model's performance based on accuracy.
+
+The final step involves applying our model to new or unseen data, allowing us to forecast quarterbacks' performances in terms of EPA. By assessing the accuracy of our predictions, we can gauge the model's efficacy and refine it for improved future forecasts.
+
+Our use of logistic regression, especially within the framework of sports analytics, underscores its versatility and effectiveness in predicting binary outcomes. However, it's crucial to acknowledge the model's limitations, including its dependence on the quality and relevance of the input features. Additionally, while logistic regression can offer insights into the likelihood of specific outcomes, it does not account for the intricacies of game dynamics or individual player conditions.
+
+## Discussion
+In our investigation, we endeavored to forecast quarterback efficiency through passing EPA (Expected Points Added) for the second half of the NFL 2023 season. The methodology centers on logistic regression, a statistical technique adept at handling binary outcomes. The essence of our approach was to categorize quarterbacks' passing EPA performances into binary classifications: performances above or below the median EPA value. This dichotomy allows us to employ logistic regression effectively, providing a probabilistic understanding of a quarterback's efficiency relative to a defined benchmark.
+
+The logistic regression model is formulated to predict the likelihood ($\hat{p}$) of a quarterback's passing EPA being above the median, considering key performance indicators such as completions, attempts, passing yards, touchdowns, and interceptions. These variables were meticulously chosen based on their established influence on a game's scoring dynamics, thereby acting as a proxy for quarterback efficiency.
+
+A pivotal aspect of our analysis was the binary transformation of the `passing_epa` variable, which was essential for adapting the dataset to the logistic regression framework. This approach, while simplifying the outcome into a binary variable, allows for a nuanced interpretation of quarterback performances across different game contexts and against varying defenses.
+
+The construction of our logistic regression model was facilitated by the use of Python's scikit-learn library [@pedregosa2011scikit], a choice motivated by its robustness and ease of use for implementing and evaluating statistical models. Our analysis process involved not only the training of the model using historical data from the first half of the 2023 season but also the validation of its predictive power on unseen data.
+
+The prediction of quarterback efficiency using passing EPA (Expected Points Added) through logistic regression directly relates to understanding and forecasting how effectively a quarterback contributes to their team's scoring opportunities. In the context of NFL analytics, `passing_epa` is a sophisticated metric that quantifies the value a player adds to their team's expected point tally on a per-play basis, adjusted for the situation of the play (e.g., down, distance, field position).
+
+### Relationship Between Predictions and Quarterback Efficiency
+
+1. **Quantifying Impact**: By predicting whether a quarterback's performance (in terms of passing EPA) will be above or below the median, we're essentially gauging their impact on the game. Quarterbacks predicted to perform above the median are viewed as having a more significant positive impact on their team's scoring chances.
+
+2. **Performance Benchmarks**: The median passing EPA serves as a benchmark for efficiency. Predicting a quarterback's performance relative to this benchmark allows teams and analysts to understand how a quarterback's performance compares to league-wide standards.
+
+3. **Decision-Making and Strategy**: The predictions inform coaching staff and management about potential quarterback performance, aiding in strategic decisions such as play-calling, game planning, and personnel adjustments. For example, a quarterback forecasted to perform well against certain defenses might influence game strategies to exploit these matchups.
+
+4. **Evaluating Key Metrics**: The model considers various performance metrics (completions, attempts, passing yards, touchdowns, interceptions) that are intrinsically related to a quarterback's efficiency. Predictions based on these metrics offer insights into which aspects of a quarterback's game are most likely to contribute to efficient scoring opportunities.
+
+5. **Binary Outcome Limitations**: While the binary prediction (above or below median EPA) provides a simplified view of quarterback efficiency, it highlights the significance of `passing_epa` as an evaluative tool. However, it does not capture the magnitude of efficiency or the specific value a quarterback adds beyond the median level.
+
+### Implications
+
+The use of logistic regression to forecast quarterback efficiency via `passing_epa` reflects an analytical approach to understanding the multifaceted role of quarterbacks in American football. The predictions not only serve as an evaluative benchmark but also as a strategic tool for enhancing team performance. By focusing on the probability of a quarterback exceeding a median performance threshold, teams can better understand potential game outcomes and adjust their strategies accordingly.
+
+However, it's important to recognize the model's scope and the complexity of football dynamics. Quarterback efficiency, while critical, is just one piece of the puzzle. Team success depends on a multitude of factors, including defense, special teams, and coaching strategies. Future models might integrate these additional dimensions to offer a more holistic view of game outcomes and player contributions.
+
+## Results
+
+Upon applying the logistic regression model to the test dataset, we observed a commendable level of accuracy in forecasting quarterback performances in terms of passing EPA. The model's predictions, delineated as probabilities, provide insights into the likelihood of a quarterback's efficiency surpassing the median benchmark in forthcoming games.
+
+Our findings underscore the significance of key performance metrics in forecasting quarterback efficiency. For instance, quarterbacks with higher completion rates and passing yards tend to have a higher probability of exceeding the median passing EPA, highlighting the importance of accuracy and offensive play in determining quarterback performance.
+
+However, it's crucial to acknowledge the limitations inherent in our approach. While logistic regression offers a structured method for prediction, the binary outcome does not encapsulate the magnitude of a quarterback's efficiency—merely the probability of it being above a certain threshold. Furthermore, external factors such as team strategy, opponent strength, and environmental conditions, which could significantly impact game outcomes, are not directly accounted for in the model.
+
+Despite these limitations, our model presents a viable framework for forecasting quarterback performance in the NFL, offering valuable insights for coaches, analysts, and fans alike. Future research could explore more complex models or incorporate additional variables to enhance predictive accuracy and provide a more comprehensive analysis of quarterback efficiency.
+
+\newpage
+
+
+# References
+
+
